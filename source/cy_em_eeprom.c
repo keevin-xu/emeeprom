@@ -911,7 +911,9 @@ static cy_en_em_eeprom_status_t WriteRow(
 {
     cy_en_em_eeprom_status_t result = CY_EM_EEPROM_SUCCESS;
     cy_rslt_t writeResult = CY_RSLT_SUCCESS;
-    bool isEraseRequired = context->bd->is_erase_required;
+    bool isEraseRequired = context->bd->is_erase_required(context->bd->context,
+                                                          ((uint32_t)rowAddr),
+                                                          context->rowSize);
 
     if (0u != context->blockingWrite)
     {
@@ -984,7 +986,9 @@ static cy_en_em_eeprom_status_t EraseRow(
 {
     cy_en_em_eeprom_status_t result = CY_EM_EEPROM_WRITE_FAIL;
     cy_rslt_t eraseResult = CY_RSLT_SUCCESS;
-    bool isEraseRequired = context->bd->is_erase_required;
+    bool isEraseRequired = context->bd->is_erase_required(context->bd->context,
+                                                          ((uint32_t)rowAddr),
+                                                          context->rowSize);
 
     if (0u != context->blockingWrite)
     {
@@ -1625,7 +1629,6 @@ static cy_en_em_eeprom_status_t CopyHeadersData(
             }
             ptrRowRead = GetNextRowPointer(ptrRowRead, context);
         }
-        crcStatus = CY_EM_EEPROM_SUCCESS;
     }
     return (crcStatus);
 }

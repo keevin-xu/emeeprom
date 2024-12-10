@@ -320,6 +320,21 @@
  * For convenience, use the CY_EM_EEPROM_GET_PHYSICAL_SIZE macro to
  * get the needed Em_EEPROM storage size depending on the configuration.
  *
+ * For MXS40v2 devices, if using ARM compiler, there is a required manual update
+ * to the linker script needed to correctly align the Em_EEPROM storage to the start
+ * of a Flash sector. This can be achieved by updating the align size for ER_FLASH_CODE
+ * sector in the default linker script from 16 to 512 as follows:
+ * * original: \n
+ *      `ER_FLASH_CODE
+ * AlignExpr(FLASH_START_VMA+ImageLength(ER_FLASH_VECTORS)+ImageLength(ER_FLASH_ROOT),`
+ *      <b>16</b>
+ *      `) OVERLAY`
+ * * updated: \n
+ *      `ER_FLASH_CODE
+ * AlignExpr(FLASH_START_VMA+ImageLength(ER_FLASH_VECTORS)+ImageLength(ER_FLASH_ROOT), `
+ *      <b>512</b>
+ *      `) OVERLAY`
+ *
  ********************************************************************************
  * \subsubsection section_em_eeprom_auxflash_location Em_EEPROM Location in the auxiliary flash
  ********************************************************************************

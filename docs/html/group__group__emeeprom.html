@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Emulated EEPROM (emeeprom)</title>
+<title>(emeeprom)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="http://www.cypress.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Emulated EEPROM (emeeprom)</div>
+   <div id="projectname">(emeeprom)</div>
   </td>
  </tr>
  </tbody>
@@ -150,7 +150,7 @@ Quick Start Guide</h1>
 </div><!-- fragment --> The allocated memory must be initialized by zeros, and aligned to the whole row size CY_EM_EEPROM_FLASH_SIZEOF_ROW for Flash based products, otherwise the Em_EEPROM middleware behavior will be unexpected.<br  />
  Refer to the <a class="el" href="group__group__emeeprom.html#section_em_eeprom_configuration_considerations">Configuration Considerations</a> section for other options of Em_EEPROM nvm allocation.</li>
 <li>Allocate memory for the Em_EEPROM context structure: <div class="fragment"><div class="line">    <a class="code hl_struct" href="group__group__emeeprom.html#structcy__stc__eeprom__context__t">cy_stc_eeprom_context_t</a> eepromContext;</div>
-<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__context__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__context__t">cy_stc_eeprom_context_t</a></div><div class="ttdoc">The Em_EEPROM context data structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1147</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__context__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__context__t">cy_stc_eeprom_context_t</a></div><div class="ttdoc">The Em_EEPROM context data structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1162</div></div>
 </div><!-- fragment --></li>
 <li>Allocate memory for the Em_EEPROM configuration structure and initialize it: <div class="fragment"><div class="line">    <a class="code hl_struct" href="group__group__emeeprom.html#structcy__stc__eeprom__config__t">cy_stc_eeprom_config_t</a> eepromConfig =</div>
 <div class="line">    {</div>
@@ -161,8 +161,8 @@ Quick Start Guide</h1>
 <div class="line">        .blockingWrite        = 1u,</div>
 <div class="line">        .userFlashStartAddr   = (uint32_t)&amp;(emEepromStorage[0u]),</div>
 <div class="line">    };</div>
-<div class="ttc" id="agroup__group__emeeprom_html_ad41b3c5ce4619d484a648a5a4bcc0bad"><div class="ttname"><a href="group__group__emeeprom.html#ad41b3c5ce4619d484a648a5a4bcc0bad">cy_stc_eeprom_config_t::eepromSize</a></div><div class="ttdeci">uint32_t eepromSize</div><div class="ttdoc">The logical size of data in bytes to store in the Em_EEPROM.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1019</div></div>
-<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__config__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__config__t">cy_stc_eeprom_config_t</a></div><div class="ttdoc">Em_EEPROM configuration structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1006</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_ad41b3c5ce4619d484a648a5a4bcc0bad"><div class="ttname"><a href="group__group__emeeprom.html#ad41b3c5ce4619d484a648a5a4bcc0bad">cy_stc_eeprom_config_t::eepromSize</a></div><div class="ttdeci">uint32_t eepromSize</div><div class="ttdoc">The logical size of data in bytes to store in the Em_EEPROM.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1034</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__config__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__config__t">cy_stc_eeprom_config_t</a></div><div class="ttdoc">Em_EEPROM configuration structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1021</div></div>
 </div><!-- fragment --> or <div class="fragment"><div class="line">    <a class="code hl_struct" href="group__group__emeeprom.html#structcy__stc__eeprom__config2__t">cy_stc_eeprom_config2_t</a> eepromNewConfig =</div>
 <div class="line">    {</div>
 <div class="line">        <span class="comment">/* Example of emeeprom storage of logic size 128 bytes,</span></div>
@@ -175,8 +175,8 @@ Quick Start Guide</h1>
 <div class="line">        .blockingWrite        = 1u,</div>
 <div class="line">        .userNvmStartAddr     = (uint32_t)&amp;(emEepromStorage[0u]),</div>
 <div class="line">    };</div>
-<div class="ttc" id="agroup__group__emeeprom_html_ab7fc595ca299793465899b58460c0238"><div class="ttname"><a href="group__group__emeeprom.html#ab7fc595ca299793465899b58460c0238">cy_stc_eeprom_config2_t::eepromSize</a></div><div class="ttdeci">uint32_t eepromSize</div><div class="ttdoc">The logical size of data in bytes to store in the Em_EEPROM.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1087</div></div>
-<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__config2__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__config2__t">cy_stc_eeprom_config2_t</a></div><div class="ttdoc">Em_EEPROM new configuration structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1074</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_ab7fc595ca299793465899b58460c0238"><div class="ttname"><a href="group__group__emeeprom.html#ab7fc595ca299793465899b58460c0238">cy_stc_eeprom_config2_t::eepromSize</a></div><div class="ttdeci">uint32_t eepromSize</div><div class="ttdoc">The logical size of data in bytes to store in the Em_EEPROM.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1102</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_structcy__stc__eeprom__config2__t"><div class="ttname"><a href="group__group__emeeprom.html#structcy__stc__eeprom__config2__t">cy_stc_eeprom_config2_t</a></div><div class="ttdoc">Em_EEPROM new configuration structure.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1089</div></div>
 </div><!-- fragment --></li>
 <li>Initialize the Em_EEPROM middleware once at the start: <div class="fragment"><div class="line">    <span class="keywordflow">if</span> (CY_RSLT_SUCCESS != <a class="code hl_function" href="group__group__emeeprom.html#gab9f608d788f1a854b10c652c3bb00fdd">Cy_Em_EEPROM_Init</a>(&amp;eepromConfig, &amp;eepromContext))</div>
 <div class="line">    {</div>
@@ -185,6 +185,7 @@ Quick Start Guide</h1>
 <div class="ttc" id="agroup__group__emeeprom_html_gab9f608d788f1a854b10c652c3bb00fdd"><div class="ttname"><a href="group__group__emeeprom.html#gab9f608d788f1a854b10c652c3bb00fdd">Cy_Em_EEPROM_Init</a></div><div class="ttdeci">cy_en_em_eeprom_status_t Cy_Em_EEPROM_Init(const cy_stc_eeprom_config_t *config, cy_stc_eeprom_context_t *context)</div><div class="ttdoc">This function was the entry point up until version 2.20.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.c:81</div></div>
 </div><!-- fragment --> or <div class="fragment"><div class="line">    <span class="comment">/* Example showcasing the initialization of a block storage device object based on HAL NVM */</span></div>
 <div class="line">    mtb_block_storage_t my_bsd;</div>
+<div class="line"> </div>
 <div class="line">    <span class="keywordflow">if</span> (CY_RSLT_SUCCESS == mtb_block_storage_nvm_create(&amp;my_bsd))</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keywordflow">if</span> (CY_RSLT_SUCCESS != <a class="code hl_function" href="group__group__emeeprom.html#ga4002a38fb2fd80487dc58eb4518a471f">Cy_Em_EEPROM_Init_BD</a>(&amp;eepromNewConfig, &amp;eepromContext, &amp;my_bsd))</div>
@@ -304,6 +305,12 @@ Em_EEPROM Location in the application flash</h3>
 <div class="fragment"><div class="line">CY_ALIGN(CY_EM_EEPROM_FLASH_SIZEOF_ROW)</div>
 <div class="line"><span class="keyword">const</span> uint8_t emEepromStorage[STORAGE_SIZE] = {0u};</div>
 </div><!-- fragment --><p >where STORAGE_SIZE is the size of the Em_EEPROM storage. Refer to the <a class="el" href="group__group__emeeprom.html#section_em_eeprom_location">Em_EEPROM Storage Variable Location and Size</a> section for size calculation equations. For convenience, use the CY_EM_EEPROM_GET_PHYSICAL_SIZE macro to get the needed Em_EEPROM storage size depending on the configuration.</p>
+<p >For MXS40v2 devices, if using ARM compiler, there is a required manual update to the linker script needed to correctly align the Em_EEPROM storage to the start of a Flash sector. This can be achieved by updating the align size for ER_FLASH_CODE sector in the default linker script from 16 to 512 as follows:</p><ul>
+<li>original: <br  />
+ <code>ER_FLASH_CODE AlignExpr(FLASH_START_VMA+ImageLength(ER_FLASH_VECTORS)+ImageLength(ER_FLASH_ROOT),</code> <b>16</b> <code>) OVERLAY</code></li>
+<li>updated: <br  />
+ <code>ER_FLASH_CODE AlignExpr(FLASH_START_VMA+ImageLength(ER_FLASH_VECTORS)+ImageLength(ER_FLASH_ROOT),</code> <b>512</b> <code>) OVERLAY</code></li>
+</ul>
 <h3><a class="anchor" id="section_em_eeprom_auxflash_location"></a>
 Em_EEPROM Location in the auxiliary flash</h3>
 <p >Writes to rows affect the endurance of other rows in the same sector. We recommend using the auxiliary flash for frequently-updated data. The below example shows placing the Em_EEPROM storage in the auxiliary flash (section .cy_em_eeprom) for GCC, ARMCC, and IAR compilers.</p>
@@ -341,8 +348,8 @@ Em_EEPROM Storage at a Fixed Address for GCC</h3>
 <div class="line">    eepromConfig.<a class="code hl_variable" href="group__group__emeeprom.html#a686ebc626fadcdce3ffc40406f707f49">userFlashStartAddr</a> = (uint32_t)&amp;(emEepromStorage[0u]);</div>
 <div class="line">    <span class="comment">//New configuration</span></div>
 <div class="line">    eepromNewConfig.<a class="code hl_variable" href="group__group__emeeprom.html#a293c254f31fe0bd80b801c82819de60f">userNvmStartAddr</a> = (uint32_t)&amp;(emEepromStorage[0u]);</div>
-<div class="ttc" id="agroup__group__emeeprom_html_a293c254f31fe0bd80b801c82819de60f"><div class="ttname"><a href="group__group__emeeprom.html#a293c254f31fe0bd80b801c82819de60f">cy_stc_eeprom_config2_t::userNvmStartAddr</a></div><div class="ttdeci">uint32_t userNvmStartAddr</div><div class="ttdoc">The address of the nvm storage.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1137</div></div>
-<div class="ttc" id="agroup__group__emeeprom_html_a686ebc626fadcdce3ffc40406f707f49"><div class="ttname"><a href="group__group__emeeprom.html#a686ebc626fadcdce3ffc40406f707f49">cy_stc_eeprom_config_t::userFlashStartAddr</a></div><div class="ttdeci">uint32_t userFlashStartAddr</div><div class="ttdoc">The address of the nvm storage.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1069</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_a293c254f31fe0bd80b801c82819de60f"><div class="ttname"><a href="group__group__emeeprom.html#a293c254f31fe0bd80b801c82819de60f">cy_stc_eeprom_config2_t::userNvmStartAddr</a></div><div class="ttdeci">uint32_t userNvmStartAddr</div><div class="ttdoc">The address of the nvm storage.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1152</div></div>
+<div class="ttc" id="agroup__group__emeeprom_html_a686ebc626fadcdce3ffc40406f707f49"><div class="ttname"><a href="group__group__emeeprom.html#a686ebc626fadcdce3ffc40406f707f49">cy_stc_eeprom_config_t::userFlashStartAddr</a></div><div class="ttdeci">uint32_t userFlashStartAddr</div><div class="ttdoc">The address of the nvm storage.</div><div class="ttdef"><b>Definition:</b> cy_em_eeprom.h:1084</div></div>
 </div><!-- fragment --></li>
 <li>Build the project to verify the correctness of the linker control file modifications.</li>
 </ol>
@@ -1230,7 +1237,7 @@ The block storage object holding the information on prototypes for the necessary
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Emulated EEPROM (emeeprom)</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>(emeeprom)</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>
