@@ -48,8 +48,12 @@ static cy_en_em_eeprom_status_t CheckRanges(const cy_stc_eeprom_config2_t* confi
                                             const cy_stc_eeprom_context_t* context);
 static cy_en_em_eeprom_status_t WriteRow(uint32_t* const rowAddr, const uint32_t* rowData,
                                          const cy_stc_eeprom_context_t* context);
+static cy_en_em_eeprom_status_t WriteRowWrap(uint32_t* const rowAddr, const uint32_t* rowData,
+                                             const cy_stc_eeprom_context_t* context);
 static cy_en_em_eeprom_status_t EraseRow(const uint32_t* rowAddr, const uint32_t* ramBuffAddr,
                                          const cy_stc_eeprom_context_t* context);
+static cy_en_em_eeprom_status_t EraseRowWrap(const uint32_t* rowAddr, const uint32_t* ramBuffAddr,
+                                             const cy_stc_eeprom_context_t* context);
 static uint32_t CalculateRowChecksum(const uint32_t* ptrRow, uint32_t rowSize);
 static uint32_t GetStoredRowChecksum(const uint32_t* ptrRow);
 static cy_en_em_eeprom_status_t CheckRowChecksum(const uint32_t* ptrRow, uint32_t rowSize);
@@ -126,8 +130,11 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Init_BD(
         context->bd = block_device;
         context->userNvmStartAddr = config->userNvmStartAddr;
         context->simpleMode = config->simpleMode;
+        context->eepromSize = config->eepromSize;
 
         /* Stores frequently used data for internal use */
+        context->secSize = context->bd->get_erase_size(context->bd->context,
+                                                       context->userNvmStartAddr);
         ComputeEEPROMProgramSize(context);
 
         /* Check if simpleMode is enabled */
@@ -146,7 +153,6 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Init_BD(
         /* Defines the length of data that can be stored in the Em_EEPROM header. */
         context->headerDataLength = (context->byteInRow - CY_EM_EEPROM_HEADER_DATA_OFFSET);
 
-        context->eepromSize = config->eepromSize;
         context->numberOfRows = ((((context->eepromSize) - 1uL) / (context->byteInRow)) + 1uL);
 
         result = CheckRanges(config, context);
@@ -528,8 +534,8 @@ static cy_en_em_eeprom_status_t WriteSimpleMode(
     cy_en_em_eeprom_status_t result = CY_EM_EEPROM_SUCCESS;
     uint32_t wrCnt = 0u;
     uint32_t numBytes = 0;
-    uint32_t startAddr = addr % (context->rowSize);
-    uint32_t numWrites = (((size + startAddr) - 1u) / (context->rowSize)) + 1u;
+    uint32_t startAddr = addr % context->secSize;
+    uint32_t numWrites = (((size + startAddr) - 1u) / (context->secSize)) + 1u;
     uint32_t* ptrRow = (uint32_t*)(context->userNvmStartAddr + (addr - startAddr));
     const uint8_t* ptrUserData_p = eepromData;
     uint32_t ptrUserData = (uint32_t)ptrUserData_p;
@@ -540,9 +546,9 @@ static cy_en_em_eeprom_status_t WriteSimpleMode(
     {
         #if (CPUSS_FLASHC_ECT == 1)
         /* Fills the RAM buffer with all 0s if the row has never been written before */
-        if (WorkFlashIsErased(ptrRow, (context->rowSize)))
+        if (WorkFlashIsErased(ptrRow, context->secSize))
         {
-            (void)memset((uint8_t*)&writeRamBuffer[0u], 0, (context->rowSize));
+            (void)memset((uint8_t*)&writeRamBuffer[0u], 0, context->secSize);
         }
         else
         #endif /* (CPUSS_FLASHC_ECT == 1) */
@@ -552,12 +558,12 @@ static cy_en_em_eeprom_status_t WriteSimpleMode(
                overwritten */
             context->bd->read(context->bd->context,
                               (uint32_t)ptrRow,
-                              (context->rowSize),
+                              context->secSize,
                               (uint8_t*)&writeRamBuffer[0u]);
         }
 
         /* Calculates the number of bytes to be written into the current row */
-        numBytes = (context->rowSize) - startAddr;
+        numBytes = context->secSize - startAddr;
         if (numBytes > lc_size)
         {
             numBytes = lc_size;
@@ -567,7 +573,7 @@ static cy_en_em_eeprom_status_t WriteSimpleMode(
                      (const uint8_t*)ptrUserData, numBytes);
 
         /* Writes data to the specified nvm row */
-        result = WriteRow(ptrRow, &writeRamBuffer[0u], context);
+        result = WriteRowWrap(ptrRow, &writeRamBuffer[0u], context);
 
         if (CY_EM_EEPROM_SUCCESS == result)
         {
@@ -581,7 +587,7 @@ static cy_en_em_eeprom_status_t WriteSimpleMode(
         startAddr = 0u;
         lc_size -= numBytes;
         ptrUserData += numBytes;
-        ptrRow += context->rowSize / 4;
+        ptrRow += context->secSize / 4;
         wrCnt++;
     }
 
@@ -668,14 +674,14 @@ static cy_en_em_eeprom_status_t WriteExtendedMode(
             &writeRamBuffer[0u], (context->rowSize));
 
         /* 7. Writes data to the specified nvm row */
-        retWriteRow = WriteRow(ptrRow, &writeRamBuffer[0u], context);
+        retWriteRow = WriteRowWrap(ptrRow, &writeRamBuffer[0u], context);
         if ((CY_EM_EEPROM_SUCCESS == retWriteRow) && (0u != context->redundantCopy))
         {
             /* Writes data to the specified nvm row in the redundant copy area */
             ptrRowCopy = ptrRow +
                          ((context->numberOfRows * context->wearLevelingFactor) *
                           (context->rowSize / 4));
-            retWriteRow = WriteRow(ptrRowCopy, &writeRamBuffer[0u], context);
+            retWriteRow = WriteRowWrap(ptrRowCopy, &writeRamBuffer[0u], context);
         }
 
         if (CY_EM_EEPROM_SUCCESS == retWriteRow)
@@ -720,15 +726,17 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Erase(cy_stc_eeprom_context_t* context)
 
     if (0u != context->simpleMode)
     {
+        uint32_t numSecs = (((numRows * context->rowSize) - 1) /
+                            context->secSize) + 1;
         ptrRow = (uint32_t*)context->userNvmStartAddr;
-        for (i = 0u; i < numRows; i++)
+        for (i = 0u; i < numSecs; i++)
         {
-            retStatus = EraseRow(ptrRow, &writeRamBuffer[0u], context);
+            retStatus = EraseRowWrap(ptrRow, &writeRamBuffer[0u], context);
             if (CY_EM_EEPROM_SUCCESS == result)
             {
                 result = retStatus;
             }
-            ptrRow += context->rowSize / 4;
+            ptrRow += context->secSize / 4;
         }
     }
     else
@@ -746,12 +754,12 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Erase(cy_stc_eeprom_context_t* context)
             &writeRamBuffer[0u], (context->rowSize));
 
         /* Performs writing */
-        result = WriteRow(ptrRow, &writeRamBuffer[0u], context);
+        result = WriteRowWrap(ptrRow, &writeRamBuffer[0u], context);
         /* Duplicates writing into a redundant copy if enabled */
         if (0u != context->redundantCopy)
         {
             ptrRowCopy = ptrRow + (numRows * (context->rowSize / 4));
-            retStatus = WriteRow(ptrRowCopy, &writeRamBuffer[0u], context);
+            retStatus = WriteRowWrap(ptrRowCopy, &writeRamBuffer[0u], context);
             if (CY_EM_EEPROM_SUCCESS == result)
             {
                 result = retStatus;
@@ -766,7 +774,7 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Erase(cy_stc_eeprom_context_t* context)
             for (i = 0u; i < (numRows - 1u); i++)
             {
                 ptrRow = GetNextRowPointer(ptrRow, context);
-                retStatus = EraseRow(ptrRow, &writeRamBuffer[0u], context);
+                retStatus = EraseRowWrap(ptrRow, &writeRamBuffer[0u], context);
                 if (CY_EM_EEPROM_SUCCESS == result)
                 {
                     result = retStatus;
@@ -775,7 +783,7 @@ cy_en_em_eeprom_status_t Cy_Em_EEPROM_Erase(cy_stc_eeprom_context_t* context)
                 if (0u != context->redundantCopy)
                 {
                     ptrRowCopy = ptrRow + (numRows * (context->rowSize / 4));
-                    retStatus = EraseRow(ptrRowCopy, &writeRamBuffer[0u], context);
+                    retStatus = EraseRowWrap(ptrRowCopy, &writeRamBuffer[0u], context);
                     if (CY_EM_EEPROM_SUCCESS == result)
                     {
                         result = retStatus;
@@ -914,6 +922,7 @@ static cy_en_em_eeprom_status_t WriteRow(
     bool isEraseRequired = context->bd->is_erase_required(context->bd->context,
                                                           ((uint32_t)rowAddr),
                                                           context->rowSize);
+    uint32_t size = (context->secSize > context->rowSize) ? context->secSize : context->rowSize;
 
     if (0u != context->blockingWrite)
     {
@@ -921,13 +930,14 @@ static cy_en_em_eeprom_status_t WriteRow(
         {
             writeResult = context->bd->erase(context->bd->context,
                                              ((uint32_t)rowAddr),
-                                             context->rowSize);
+                                             size);
         }
-        if (result == CY_RSLT_SUCCESS)
+
+        if (writeResult == CY_RSLT_SUCCESS)
         {
             writeResult = context->bd->program(context->bd->context,
                                                ((uint32_t)rowAddr),
-                                               context->rowSize,
+                                               size,
                                                (uint8_t*)rowData);
         }
     }
@@ -938,19 +948,54 @@ static cy_en_em_eeprom_status_t WriteRow(
         {
             writeResult = context->bd->erase_nb(context->bd->context,
                                                 ((uint32_t)rowAddr),
-                                                context->rowSize);
+                                                size);
         }
-        if (result == CY_RSLT_SUCCESS)
+        if (writeResult == CY_RSLT_SUCCESS)
         {
             writeResult = context->bd->program_nb(context->bd->context,
                                                   ((uint32_t)rowAddr),
-                                                  context->rowSize,
+                                                  size,
                                                   (uint8_t*)rowData);
         }
     }
     #endif /* defined(MTB_BLOCK_STORAGE_NON_BLOCKING_SUPPORTED) */
 
     result  = ((writeResult == CY_RSLT_SUCCESS) ? CY_EM_EEPROM_SUCCESS : CY_EM_EEPROM_WRITE_FAIL);
+    return result;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+// WriteRowWrap
+//--------------------------------------------------------------------------------------------------
+static cy_en_em_eeprom_status_t WriteRowWrap(
+    uint32_t* const rowAddr,
+    const uint32_t* rowData,
+    const cy_stc_eeprom_context_t* context)
+{
+    cy_en_em_eeprom_status_t result = CY_EM_EEPROM_SUCCESS;
+    uint32_t lc_buf[CY_EM_EEPROM_MAXIMUM_ROW_SIZE / 4U];
+    uint32_t secAddr;
+
+    if (!context->simpleMode && (context->secSize > context->rowSize))
+    {
+        secAddr = (uint32_t)rowAddr - ((uint32_t)rowAddr % context->secSize);
+        /* Reads data from sector, where rowAddr is. */
+        context->bd->read(context->bd->context,
+                          secAddr,
+                          context->secSize,
+                          (uint8_t*)(lc_buf));
+
+        (void)memcpy((void*)(lc_buf + ((uint32_t)rowAddr % context->secSize / 4UL)),
+                     (const void*)rowData, context->rowSize);
+
+        result = WriteRow((uint32_t*)secAddr, lc_buf, context);
+    }
+    else
+    {
+        result = WriteRow(rowAddr, rowData, context);
+    }
+
     return result;
 }
 
@@ -989,6 +1034,7 @@ static cy_en_em_eeprom_status_t EraseRow(
     bool isEraseRequired = context->bd->is_erase_required(context->bd->context,
                                                           ((uint32_t)rowAddr),
                                                           context->rowSize);
+    uint32_t size = (context->secSize > context->rowSize) ? context->secSize : context->rowSize;
 
     if (0u != context->blockingWrite)
     {
@@ -996,13 +1042,13 @@ static cy_en_em_eeprom_status_t EraseRow(
         {
             eraseResult = context->bd->erase(context->bd->context,
                                              ((uint32_t)rowAddr),
-                                             context->rowSize);
+                                             size);
         }
         if (eraseResult == CY_RSLT_SUCCESS)
         {
             eraseResult = context->bd->program(context->bd->context,
                                                ((uint32_t)rowAddr),
-                                               context->rowSize,
+                                               size,
                                                (uint8_t*)ramBuffAddr);
         }
     }
@@ -1013,19 +1059,54 @@ static cy_en_em_eeprom_status_t EraseRow(
         {
             eraseResult = context->bd->erase_nb(context->bd->context,
                                                 ((uint32_t)rowAddr),
-                                                context->rowSize);
+                                                size);
         }
         if (eraseResult == CY_RSLT_SUCCESS)
         {
             eraseResult = context->bd->program_nb(context->bd->context,
                                                   ((uint32_t)rowAddr),
-                                                  context->rowSize,
+                                                  size,
                                                   (uint8_t*)ramBuffAddr);
         }
     }
     #endif /* defined(MTB_BLOCK_STORAGE_NON_BLOCKING_SUPPORTED) */
 
     result  = ((eraseResult == CY_RSLT_SUCCESS) ? CY_EM_EEPROM_SUCCESS : CY_EM_EEPROM_WRITE_FAIL);
+    return result;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+// EraseRowWrap
+//--------------------------------------------------------------------------------------------------
+static cy_en_em_eeprom_status_t EraseRowWrap(
+    const uint32_t* rowAddr,
+    const uint32_t* ramBuffAddr,
+    const cy_stc_eeprom_context_t* context)
+{
+    cy_en_em_eeprom_status_t result = CY_EM_EEPROM_SUCCESS;
+    uint32_t lc_buf[CY_EM_EEPROM_MAXIMUM_ROW_SIZE / 4U];
+    uint32_t SecAddr;
+
+    if (!context->simpleMode && (context->secSize > context->rowSize))
+    {
+        SecAddr = (uint32_t)rowAddr - ((uint32_t)rowAddr % context->secSize);
+        /* Reads data from sector, where rowAddr is. */
+        context->bd->read(context->bd->context,
+                          SecAddr,
+                          context->secSize,
+                          (uint8_t*)(lc_buf));
+
+        (void)memcpy((void*)(lc_buf + ((uint32_t)rowAddr % context->secSize / 4UL)),
+                     (const void*)ramBuffAddr, context->rowSize);
+
+        result = EraseRow((uint32_t*)SecAddr, lc_buf, context);
+    }
+    else
+    {
+        result = EraseRow(rowAddr, ramBuffAddr, context);
+    }
+
     return result;
 }
 
@@ -1679,9 +1760,21 @@ static void ComputeEEPROMProgramSize(cy_stc_eeprom_context_t* context)
 {
     uint32_t actualProgramSize =
         ((uint32_t)context->bd->get_program_size(context->bd->context, context->userNvmStartAddr));
-    if ((actualProgramSize < CY_EM_EEPROM_MINIMUM_ROW_SIZE) && (context->simpleMode == 0))
+
+
+    if (context->simpleMode == 0)
     {
-        context->rowSize = (((CY_EM_EEPROM_MINIMUM_ROW_SIZE - 1) / actualProgramSize) + 1) *
+        // Assign rowSize to eepromSize and make sure it is multiple of programSize
+        context->rowSize = (((context->eepromSize - 1) / actualProgramSize) + 1) *
+                           actualProgramSize;
+        // Make sure rowSize is smaller than or equal to secSize
+        context->rowSize =
+            (context->rowSize > context->secSize) ? context->secSize : context->rowSize;
+        if (context->rowSize < CY_EM_EEPROM_MINIMUM_ROW_SIZE)
+        {
+            context->rowSize = CY_EM_EEPROM_MINIMUM_ROW_SIZE;
+        }
+        context->rowSize = (((context->rowSize - 1) / actualProgramSize) + 1) *
                            actualProgramSize;
     }
     else

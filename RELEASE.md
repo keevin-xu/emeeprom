@@ -4,6 +4,9 @@
 Please refer to the [README.md](./README.md) and the [API Reference Guide](https://infineon.github.io/emeeprom/html/index.html) for a complete description of the Emulated EEPROM Middleware.
 The revision history of the Emulated EEPROM Middleware is also available on the [API Reference Guide Changelog](https://github.com/Infineon/emeeprom/blob/master/RELEASE.md).
 ### What Changed?
+Release version v2.60.0:
+* Updated implementation based on program size
+
 Release version v2.50.0:
 * Added support for MXS40v2 devices
 

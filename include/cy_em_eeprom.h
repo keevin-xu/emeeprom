@@ -1171,6 +1171,11 @@ typedef struct
      */
     uint16_t rowSize;
 
+    /** The size of a EEPROM sector in bytes, equal to the erase size
+     * of the NVM. It is larger or equal to program size.
+     */
+    uint32_t secSize;
+
     /** The number of bytes to store in Em_EEPROM. */
     uint32_t eepromSize;
 

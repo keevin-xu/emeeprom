@@ -19,6 +19,7 @@ var group__group__emeeprom =
     [ "cy_stc_eeprom_context_t", "group__group__emeeprom.html#structcy__stc__eeprom__context__t", [
       [ "numberOfRows", "group__group__emeeprom.html#ae36a1dffdb6999d0da9f763041c3ca78", null ],
       [ "rowSize", "group__group__emeeprom.html#a9fc76f95ee987ca778dd4dede367ec12", null ],
+      [ "secSize", "group__group__emeeprom.html#a1121324b238c1f311dee69310d8e5851", null ],
       [ "eepromSize", "group__group__emeeprom.html#a1136c1032e20149af06f0763849211d9", null ],
       [ "wearLevelingFactor", "group__group__emeeprom.html#a73845ac1bd1d2c5b4eafd9efc86f7fa9", null ],
       [ "simpleMode", "group__group__emeeprom.html#a8568bff10b78e3b1171a774501d87d1d", null ],
