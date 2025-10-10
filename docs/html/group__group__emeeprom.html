@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>(emeeprom)</title>
+<title>Emulated EEPROM</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="http://www.cypress.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">(emeeprom)</div>
+   <div id="projectname">Emulated EEPROM</div>
   </td>
  </tr>
  </tbody>
@@ -135,6 +135,7 @@ Quick Start Guide</h1>
 <li>Define the Em_EEPROM configuration as follow: <div class="fragment"><div class="line"><span class="comment">/* The size of data to store in EEPROM for devices that have flash memory</span></div>
 <div class="line"><span class="comment"> *  */</span></div>
 <div class="line"><span class="preprocessor">#define DATA_SIZE                       (CY_FLASH_SIZEOF_ROW)</span></div>
+<div class="line"><span class="preprocessor">#define ALIGNMENT_SIZE                  (CY_FLASH_SIZEOF_ROW)</span></div>
 </div><!-- fragment --> <div class="fragment"><div class="line"><span class="comment">/* The Simple Mode is turned off */</span></div>
 <div class="line"><span class="preprocessor">#define SIMPLE_MODE                     (0u)</span></div>
 </div><!-- fragment --> <div class="fragment"><div class="line"><span class="comment">/* Increases the flash endurance twice */</span></div>
@@ -144,7 +145,7 @@ Quick Start Guide</h1>
 </div><!-- fragment --> <div class="fragment"><div class="line"><span class="comment">/* The Blocking Write is turned on */</span></div>
 <div class="line"><span class="preprocessor">#define BLOCKING_WRITE                  (1u)</span></div>
 </div><!-- fragment --> Refer to the <a class="el" href="group__group__emeeprom.html#structcy__stc__eeprom__config__t">cy_stc_eeprom_config_t</a> or <a class="el" href="group__group__emeeprom.html#structcy__stc__eeprom__config2__t">cy_stc_eeprom_config2_t</a> structure for details of other configuration options.</li>
-<li>Declare the Em_EEPROM storage variable (further Em_EEPROM Storage) in the application nvm: <div class="fragment"><div class="line">CY_ALIGN(DATA_SIZE)</div>
+<li>Declare the Em_EEPROM storage variable (further Em_EEPROM Storage) in the application nvm: <div class="fragment"><div class="line">CY_ALIGN(ALIGNMENT_SIZE)</div>
 <div class="line"><span class="keyword">const</span> uint8_t emEepromStorage[CY_EM_EEPROM_GET_PHYSICAL_SIZE(DATA_SIZE, SIMPLE_MODE, WEAR_LEVELING,</div>
 <div class="line">                                                             REDUNDANT_COPY)] = { 0u };</div>
 </div><!-- fragment --> The allocated memory must be initialized by zeros, and aligned to the whole row size CY_EM_EEPROM_FLASH_SIZEOF_ROW for Flash based products, otherwise the Em_EEPROM middleware behavior will be unexpected.<br  />
@@ -1244,7 +1245,7 @@ The block storage object holding the information on prototypes for the necessary
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>(emeeprom)</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Emulated EEPROM</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

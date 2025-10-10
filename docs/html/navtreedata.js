@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "(emeeprom)", "index.html", [
+  [ "Emulated EEPROM", "index.html", [
     [ "Emulated EEPROM Library", "index.html", [
       [ "Overview", "index.html#autotoc_md1", null ],
       [ "Features", "index.html#autotoc_md2", null ],
