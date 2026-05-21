@@ -4,6 +4,8 @@ This CLI runs the Em_EEPROM middleware against a RAM-backed virtual flash device
 
 ## Build
 
+### macOS / Linux
+
 ```sh
 make host-cli
 ```
@@ -12,6 +14,21 @@ This produces:
 
 ```text
 build/emeeprom_cli
+```
+
+### Windows
+
+Use CMake with either MSVC or another Windows C compiler:
+
+```powershell
+cmake -S . -B out
+cmake --build out --config Release
+```
+
+This produces:
+
+```text
+out/build/emeeprom_cli.exe
 ```
 
 ## Run

@@ -1,15 +1,20 @@
 #include "virtual_flash.h"
 
-#include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <errno.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#endif
 
 #include "cy_syslib.h"
 
-#ifndef MAP_ANON
+#if !defined(_WIN32) && !defined(MAP_ANON)
 #define MAP_ANON MAP_ANONYMOUS
 #endif
 
@@ -131,7 +136,8 @@ cy_rslt_t virtual_flash_init(
     uint32_t program_size,
     uint32_t erase_size)
 {
-    long page_size;
+    uint32_t page_size;
+
     if ((flash == NULL) || (flash_size == 0u) || (program_size == 0u) || (erase_size == 0u))
     {
         return VIRTUAL_FLASH_ERROR;
@@ -147,13 +153,39 @@ cy_rslt_t virtual_flash_init(
     flash->erase_size = erase_size;
     flash->flash_size = flash_size;
     flash->erased_value = 0u;
-    page_size = sysconf(_SC_PAGESIZE);
-    if (page_size <= 0)
+
+#if defined(_WIN32)
+    {
+        SYSTEM_INFO system_info;
+        GetSystemInfo(&system_info);
+        page_size = (uint32_t)system_info.dwPageSize;
+    }
+#else
+    {
+        long host_page_size = sysconf(_SC_PAGESIZE);
+        if (host_page_size <= 0)
+        {
+            return VIRTUAL_FLASH_ERROR;
+        }
+        page_size = (uint32_t)host_page_size;
+    }
+#endif
+
+    if (page_size == 0u)
     {
         return VIRTUAL_FLASH_ERROR;
     }
 
     flash->mapped_size = round_up(flash_size, (uint32_t)page_size);
+
+#if defined(_WIN32)
+    void* mapped = VirtualAlloc(NULL, flash->mapped_size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (mapped == NULL)
+    {
+        fprintf(stderr, "virtual_flash: VirtualAlloc failed: %lu\n", (unsigned long)GetLastError());
+        return VIRTUAL_FLASH_ERROR;
+    }
+#else
     void* mapped = mmap(NULL,
                         flash->mapped_size,
                         PROT_READ | PROT_WRITE,
@@ -165,6 +197,7 @@ cy_rslt_t virtual_flash_init(
         fprintf(stderr, "virtual_flash: mmap failed: %s\n", strerror(errno));
         return VIRTUAL_FLASH_ERROR;
     }
+#endif
 
     flash->base_addr = (uintptr_t)mapped;
     flash->mem = (uint8_t*)mapped;
@@ -176,7 +209,11 @@ void virtual_flash_deinit(virtual_flash_t* flash)
 {
     if ((flash != NULL) && (flash->mem != NULL))
     {
+#if defined(_WIN32)
+        VirtualFree(flash->mem, 0, MEM_RELEASE);
+#else
         munmap(flash->mem, flash->mapped_size);
+#endif
         memset(flash, 0, sizeof(*flash));
     }
 }
