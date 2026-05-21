@@ -957,6 +957,12 @@
 #include "cy_result.h"
 #include "mtb_block_storage.h"
 
+#if defined(CY_EM_EEPROM_HOST_TEST)
+typedef uintptr_t cy_em_eeprom_nvm_addr_t;
+#else
+typedef uint32_t cy_em_eeprom_nvm_addr_t;
+#endif
+
 
 /* The C binding of definitions if building with the C++ compiler */
 #ifdef __cplusplus
@@ -1081,7 +1087,7 @@ typedef struct
      * configuration structure and then the structure is passed
      * to the Cy_Em_EEPROM_Init() function.
      */
-    uint32_t userFlashStartAddr;
+    cy_em_eeprom_nvm_addr_t userFlashStartAddr;
 } cy_stc_eeprom_config_t;
 
 /** Em_EEPROM new configuration structure */
@@ -1149,7 +1155,7 @@ typedef struct
      * configuration structure and then the structure is passed
      * to the Cy_Em_EEPROM_Init() function.
      */
-    uint32_t userNvmStartAddr;
+    cy_em_eeprom_nvm_addr_t userNvmStartAddr;
 } cy_stc_eeprom_config2_t;
 
 /**
@@ -1194,7 +1200,7 @@ typedef struct
     uint8_t blockingWrite;
 
     /** The start address for the Em_EEPROM memory in nvm. */
-    uint32_t userNvmStartAddr;
+    cy_em_eeprom_nvm_addr_t userNvmStartAddr;
 
     /** The number of user's data bytes in one row for non simple mode.
      * It is equal to half the row size as in non simple mode half of

@@ -1,0 +1,8 @@
+#ifndef CY_DEVICE_HEADERS_H
+#define CY_DEVICE_HEADERS_H
+
+#define CPUSS_FLASHC_ECT (0)
+#define CY_IP_MXS22RRAMC_INSTANCES (0)
+#define CY_FLASH_SIZEOF_ROW (128u)
+
+#endif
