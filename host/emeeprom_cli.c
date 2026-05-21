@@ -12,6 +12,47 @@
 #define DEFAULT_ERASE_SIZE 256u
 #define DEFAULT_EEPROM_SIZE 128u
 
+static char* next_token(char** cursor)
+{
+    char* start;
+    char* current;
+
+    if ((cursor == NULL) || (*cursor == NULL))
+    {
+        return NULL;
+    }
+
+    current = *cursor;
+    while ((*current != '\0') && isspace((unsigned char)*current))
+    {
+        current++;
+    }
+
+    if (*current == '\0')
+    {
+        *cursor = NULL;
+        return NULL;
+    }
+
+    start = current;
+    while ((*current != '\0') && !isspace((unsigned char)*current))
+    {
+        current++;
+    }
+
+    if (*current == '\0')
+    {
+        *cursor = NULL;
+    }
+    else
+    {
+        *current = '\0';
+        *cursor = current + 1;
+    }
+
+    return start;
+}
+
 typedef struct
 {
     uint32_t flash_size;
@@ -245,12 +286,8 @@ int main(int argc, char** argv)
         }
 
         cursor = line;
-        while (((token = strsep(&cursor, " \t\r\n")) != NULL))
+        while ((token = next_token(&cursor)) != NULL)
         {
-            if (*token == '\0')
-            {
-                continue;
-            }
             tokens[token_count++] = token;
             if (token_count == (sizeof(tokens) / sizeof(tokens[0])))
             {
